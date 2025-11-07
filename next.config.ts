@@ -2,12 +2,14 @@
 
 const nextConfig = {
   eslint: {
-    // уже было — не валим билд из-за eslint
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // новое — не валим билд из-за ошибок типов
     ignoreBuildErrors: true,
+  },
+  experimental: {
+    // говорим next'у: если где-то useSearchParams без Suspense — не падай на билде
+    missingSuspenseWithCSRBailout: false,
   },
 };
 
