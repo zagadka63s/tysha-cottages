@@ -1,0 +1,187 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")  // ← вот это добавили
+}
+
+/* ====== ROLES ====== */
+enum Role {
+  USER
+  ADMIN
+}
+
+/* ====== AUTH.JS CORE MODELS ====== */
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String?  @unique
+  emailVerified DateTime?
+  image         String?
+
+  // Для локальной авторизации (Credentials)
+  passwordHash  String?
+
+  role          Role     @default(USER)
+
+  // Опциональные идентификаторы для автопривязки брони (нормализованные)
+  phoneNormalized          String? @unique
+  telegramHandleNormalized String? @unique
+  telegramChatId           String? @unique // Для отправки уведомлений через Telegram бота
+
+  accounts      Account[]
+  sessions      Session[]
+
+  // Связь с бронями (один ко многим)
+  bookings      Booking[]
+
+  @@index([email])
+  @@index([telegramChatId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+/* ====== BOOKINGS ====== */
+enum BookingStatus {
+  PENDING     // оставлен запрос — ждёт ответа
+  CONFIRMED   // подтверждено
+  CANCELLED   // отменено
+}
+
+model Booking {
+  id         String        @id @default(cuid())
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  // Данные с формы
+  name       String
+  contact    String                 // как ввёл пользователь (сырой ввод)
+  contactNormalized String?         // нормализованный ключ (телефон цифрами / @handle / email lower)
+  checkIn    DateTime               // [checkIn, checkOut)
+  checkOut   DateTime
+  guests     Int                    // историческое поле (оставляем для совместимости)
+  comment    String?       @db.Text
+
+  // NEW: детализируем состав и замороженную сумму котировки
+  adults           Int       @default(2)
+  childrenTotal    Int       @default(0)
+  childrenOver6    Int       @default(0)  // детей > 6 лет для точной доплаты
+  hasPet           Boolean   @default(false)
+  quoteTotalUAH    Int?
+  currency         String    @default("UAH")
+
+  // Служебные поля
+  status     BookingStatus @default(PENDING)
+  source     String?       // "web", "telegram", ... 
+
+  // (устар.) можно удалить позже после миграции данных
+  priceUAH   Int?
+
+  // Привязка к пользователю (опционально: бронь может быть и без учётки)
+  userId     String?
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([checkIn])
+  @@index([checkOut])
+  @@index([userId])
+  @@index([contactNormalized])
+  @@index([status, checkIn])     // для быстрых фильтров/календаря
+}
+
+/* ====== PRICING MODELS ====== */
+model Season {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  startDate     DateTime   // включительно
+  endDate       DateTime   // включительно
+  weekdayPrice  Int        // грн/сутки (Пн–Чт по умолчанию)
+  weekendPrice  Int        // грн/сутки (Пт–Сб/Вс — см. weekendDays)
+  currency      String     @default("UAH")
+  weekendDays   String     @default("FRI,SAT") // CSV
+
+  @@index([startDate])
+  @@index([endDate])
+}
+
+model PriceOverride {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  date      DateTime
+  price     Int
+  reason    String?
+
+  @@unique([date])
+  @@index([date])
+}
+
+enum SurchargeType {
+  EXTRA_GUEST
+  PET
+  CHILD_OVER_AGE
+}
+
+enum SurchargeUnit {
+  PER_NIGHT
+  PER_STAY
+}
+
+model Surcharge {
+  id        String         @id @default(cuid())
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  type      SurchargeType
+  amount    Int
+  unit      SurchargeUnit
+  params    Json?
+  active    Boolean        @default(true)
+
+  @@index([type])
+  @@index([active])
+}

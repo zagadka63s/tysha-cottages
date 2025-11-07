@@ -1,26 +1,396 @@
 @import "tailwindcss";
+@reference "tailwindcss";
 
+/* =========================
+   THEME TOKENS (CSS vars)
+   ========================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --tg-bg:      #004225;  /* brand.bg   */
+  --tg-ink:     #FFFFFF;  /* brand.ink  */
+  --tg-muted:   #B2BEB5;  /* brand.muted*/
+  --tg-accent:  #D8C3A5;  /* brand.accent */
+  --tg-surface: #FFFFFF;  /* brand.surface*/
+  --tg-ink-strong: #0f1a14;
+  --tg-radius: 14px;
+
+  /* светло-беж для плашки брони */
+  --tg-sand: #E8E2D5;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* =========================
+   BASE
+   ========================= */
+html, body { height: 100%; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--tg-bg);
+  color: var(--tg-ink);
+  font-family: "Helvetica Neue", Helvetica, Arial, Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* контейнер */
+.container { @apply mx-auto max-w-6xl px-4; }
+
+/* заголовки */
+h1, h2, h3 { font-weight: 700; line-height: 1.25; }
+h1 { @apply text-4xl md:text-5xl; }
+h2 { @apply text-2xl md:text-3xl; }
+
+/* ссылки */
+a { text-decoration: none; }
+a:hover { filter: brightness(1.05); }
+
+/* =========================
+   SURFACES / CARDS
+   ========================= */
+.card {
+  background: var(--tg-surface);
+  color: var(--tg-ink-strong);
+  border-radius: var(--tg-radius);
+  border: 1px solid color-mix(in oklab, #000 8%, transparent);
+  box-shadow: var(--tg-shadow, 0 0 0 rgba(0,0,0,0));
+}
+
+/* секционные отступы */
+.section { @apply py-10 md:py-16; }
+
+/* =========================
+   BUTTONS
+   ========================= */
+.btn {
+  border-radius: calc(var(--tg-radius) - 2px);
+  font-weight: 600;
+  line-height: 1;
+  transition: transform .02s ease, filter .15s ease, box-shadow .15s ease, opacity .15s ease;
+  will-change: filter, box-shadow;
+}
+.btn-primary {
+  background: var(--tg-ink);
+  color: var(--tg-bg);
+  padding: .75rem 1.25rem;
+  box-shadow: 0 2px 0 color-mix(in oklab, #000 20%, transparent);
+}
+.btn-primary:hover { filter: brightness(0.98); }
+.btn-primary:active { transform: translateY(1px); }
+.btn-ghost {
+  background: transparent;
+  color: var(--tg-ink);
+  border: 1px solid color-mix(in oklab, var(--tg-ink) 30%, transparent);
+  padding: .65rem 1rem;
+}
+.btn-ghost:hover { background: color-mix(in oklab, var(--tg-ink) 6%, transparent); }
+.btn-ghost:active { transform: translateY(1px); }
+.btn-outline {
+  background: transparent;
+  color: var(--tg-ink);
+  border: 1px solid var(--tg-ink);
+  padding: .7rem 1.1rem;
+}
+.btn-outline:hover { background: var(--tg-ink); color: var(--tg-bg); }
+.btn-white {
+  background: var(--tg-ink);
+  color: var(--tg-bg);
+  padding: .65rem 1rem;
+  border: 1px solid transparent;
+}
+.btn-white:hover { filter: brightness(0.95); }
+.btn-sm { padding: .5rem .9rem; font-size: .875rem; }
+/* disabled */
+button[disabled], .btn[disabled] { opacity: .6; pointer-events: none; }
+
+/* =========================
+   FORMS
+   ========================= */
+.input,.select,.textarea{
+  background: var(--tg-surface);
+  color: var(--tg-ink-strong);
+  border: 1px solid color-mix(in oklab, #000 10%, transparent);
+  border-radius: calc(var(--tg-radius) - 4px);
+  padding: .75rem .9rem;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+.input::placeholder,.textarea::placeholder{ color: color-mix(in oklab, var(--tg-ink-strong) 50%, transparent); }
+.input:focus,.select:focus,.textarea:focus{
+  border-color: color-mix(in oklab, var(--tg-bg) 70%, #fff 0%);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--tg-bg) 30%, transparent);
+}
+/* иконка в полях */
+.input-icon { @apply absolute inset-y-0 right-2 grid place-items-center text-[13px]; color: color-mix(in oklab, var(--tg-ink-strong) 60%, transparent); }
+
+/* =========================
+   NAV
+   ========================= */
+.navbar { @apply sticky top-0 z-40 backdrop-blur; background: color-mix(in oklab, var(--tg-bg) 96%, transparent); }
+.nav-link { @apply px-3 py-2 text-sm; opacity: .9; }
+.nav-link:hover { opacity: 1; filter: brightness(1.05); }
+
+/* =========================
+   MISC
+   ========================= */
+.badge{
+  display:inline-block; padding:.3rem .55rem; border-radius:9999px;
+  background: color-mix(in oklab, var(--tg-ink) 12%, transparent); color: var(--tg-ink);
+  font-size:.75rem; line-height:1;
+}
+
+/* =========================
+   UI inputs (glass style)
+   ========================= */
+.ui-field{ position:relative; }
+.ui-label{ display:block; margin-bottom:.375rem; font-size:.875rem; line-height:1.2; opacity:.9; }
+.ui-input,.ui-select,.ui-textarea{
+  width:100%;
+  background: color-mix(in oklab, #fff 92%, transparent 8%);
+  color:#122016;
+  border:1px solid color-mix(in oklab, #000 10%, #fff 0%);
+  border-radius: var(--tg-radius);
+  padding:.875rem 1rem;
+  box-shadow: 0 4px 16px -6px rgb(0 0 0 / 12%);
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+.ui-input::placeholder,.ui-textarea::placeholder{ color:#000; opacity:.45; }
+.ui-input:focus,.ui-select:focus,.ui-textarea:focus{
+  outline:none; border-color: color-mix(in oklab, var(--tg-bg) 30%, #fff 0%);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--tg-bg) 18%, transparent); background:#fff;
+}
+.ui-addon-left{ position:absolute; inset-inline-start:.75rem; inset-block:0; display:grid; place-items:center; width:1.25rem; color:#234; opacity:.65; pointer-events:none; }
+.ui-input.has-left,.ui-select.has-left{ padding-left:2.25rem; }
+.ui-select{ appearance:none; background-image:none; }
+.ui-textarea{ min-height:6rem; resize:vertical; }
+
+/* =========================
+   UTILITIES (project-specific)
+   ========================= */
+@layer utilities {
+  @keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-fade-up { animation: fade-up 0.5s ease-out both; }
+
+  /* glass-поверхности */
+  .glass { @apply rounded-2xl backdrop-blur-md border border-white/15; background: color-mix(in srgb, #fff 10%, transparent); }
+
+  /* glass inner surfaces */
+  .glass-inner { @apply bg-white/5 backdrop-blur-sm; }
+
+  /* masonry */
+  .masonry { column-count: 1; column-gap: 1rem; }
+  @media (min-width:768px){ .masonry{ column-count: 2; } }
+  @media (min-width:1024px){ .masonry{ column-count: 3; } }
+  .masonry > * { break-inside: avoid; margin-bottom: 1rem; }
+
+  /* рамка «домика» */
+  .house-frame{
+    clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%);
+    position: relative;
+  }
+  .house-frame::before{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    box-shadow: 0 0 0 2px rgba(0,0,0,.08), 0 10px 30px rgba(0,0,0,.18);
+    border-radius: 16px; clip-path: inherit;
+  }
+
+  /* ====== Image Cards (для блока «Всередині») ====== */
+  .img-card { @apply rounded-2xl shadow-lg overflow-hidden; }
+  .img-card > img { width: 100%; height: 100%; display: block; }
+
+  /* Мягкая адаптивная пропорция:
+     мобайл — 3:2, планшет — 16:10, десктоп — 16:9 */
+  .aspect-soft { aspect-ratio: 3 / 2; }
+  @media (min-width: 768px) { .aspect-soft { aspect-ratio: 16 / 10; } }
+  @media (min-width: 1024px) { .aspect-soft { aspect-ratio: 16 / 9; } }
+
+  /* Режимы подгонки */
+  .obj-cover   { object-fit: cover;   object-position: center; }
+  .obj-contain { object-fit: contain; object-position: center; }
+}
+
+/* убрать декоративную «зелёную смугу» у футера, если она псевдоэлементом */
+footer::before{ content:none !important; }
+
+/* ========= Header logo upscale (уменьшен, чтобы сделать хедер тоньше) ========= */
+.header-logo {
+  display: inline-block;
+  /* было: 1.7 → делаем компактнее */
+  transform: scale(1.35);
+  transform-origin: left center;
+  will-change: transform;
+}
+@media (min-width: 768px) {
+  /* было: 2.1 */
+  .header-logo { transform: scale(1.6); }
+}
+@media (min-width: 1024px) {
+  /* было: 2.45 */
+  .header-logo { transform: scale(1.85); }
+}
+
+/* =========================================================
+   POLISH for glass cards & form on Booking page (safe overrides)
+   ========================================================= */
+
+/* Более выразительное «стекло» для всех закруглённых карточек с blur —
+   это как раз наши карточки формы и «Швидкий контакт» */
+.rounded-2xl.backdrop-blur-md{
+  backdrop-filter: blur(14px) saturate(130%);
+  background:
+    radial-gradient(120% 140% at 30% 0%, rgba(255,255,255,.14) 0%, rgba(255,255,255,.06) 60%),
+    rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.18) !important;
+  box-shadow:
+    0 10px 36px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+/* Поля внутри стеклянных карточек — белые, с мягкой тенью/фокусом */
+.rounded-2xl.backdrop-blur-md input[type="text"],
+.rounded-2xl.backdrop-blur-md input[type="tel"],
+.rounded-2xl.backdrop-blur-md input[type="date"],
+.rounded-2xl.backdrop-blur-md select,
+.rounded-2xl.backdrop-blur-md textarea{
+  background: #ffffff;
+  color: #122016;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 16px;
+  box-shadow: 0 8px 22px -10px rgba(0,0,0,.18);
+}
+.rounded-2xl.backdrop-blur-md input::placeholder,
+.rounded-2xl.backdrop-blur-md textarea::placeholder{
+  color:#000; opacity:.45;
+}
+.rounded-2xl.backdrop-blur-md input:focus,
+.rounded-2xl.backdrop-blur-md select:focus,
+.rounded-2xl.backdrop-blur-md textarea:focus{
+  outline:none;
+  border-color:#0b3b22;
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, #0b3b22 22%, transparent),
+    0 8px 22px -10px rgba(0,0,0,.22);
+  background:#fff;
+}
+
+/* >>> FIX: видимость текста во время ввода + autofill (WebKit) <<< */
+.rounded-2xl.backdrop-blur-md input,
+.rounded-2xl.backdrop-blur-md textarea{
+  color:#122016 !important;
+  -webkit-text-fill-color:#122016 !important; /* Chrome/Safari/Edge */
+  caret-color:#0b3b22;
+}
+.rounded-2xl.backdrop-blur-md input:focus,
+.rounded-2xl.backdrop-blur-md textarea:focus{
+  color:#122016 !important;
+  -webkit-text-fill-color:#122016 !important;
+}
+/* Перекрасить autofill фон и текст */
+.rounded-2xl.backdrop-blur-md input:-webkit-autofill,
+.rounded-2xl.backdrop-blur-md input:-webkit-autofill:focus,
+.rounded-2xl.backdrop-blur-md textarea:-webkit-autofill,
+.rounded-2xl.backdrop-blur-md textarea:-webkit-autofill:focus{
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color:#122016 !important;
+}
+
+/* (опц.) убрать стрелки у number */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+input[type="number"]{ -moz-appearance:textfield; }
+
+/* Кнопки — чуть современнее и отзывчивее */
+.btn{
+  border-radius: 14px;
+  font-weight: 700;
+  letter-spacing:.2px;
+  transition: transform .06s ease, filter .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.btn-primary{
+  background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+  color: #0b3b22;
+  box-shadow:
+    0 10px 24px -10px rgba(0,0,0,.25),
+    inset 0 -1px 0 rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.08);
+}
+.btn-primary:hover{ filter: brightness(.98); }
+.btn-primary:active{ transform: translateY(1px); }
+
+/* Лёгкая поддержка читаемости заголовков на фотобэкграунде */
+h1,h2,h3{ text-shadow: 0 2px 18px rgba(0,0,0,.28); }
+
+/* =========================
+   DATE PICKER (react-day-picker)
+   ========================= */
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: #10b981; /* tailwind emerald-500 */
+  --rdp-background-color: transparent;
+}
+
+/* Месяцы — в один ряд */
+.rdp-months {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: nowrap;           /* не переносить строки */
+}
+
+/* Каждый месяц только по своей ширине */
+.rdp-month {
+  width: auto;                 /* было 100% — именно это ломало раскладку */
+  min-width: 280px;            /* чтобы сетка не сжималась слишком узко */
+}
+
+.rdp-nav { display: flex; gap: .25rem; }
+.rdp-caption_label { font-weight: 600; color: rgba(255,255,255,.9); }
+
+.rdp-head_cell { color: rgba(255,255,255,.7); font-weight: 600; }
+.rdp-day {
+  border-radius: 10px;
+  color: #fff;
+}
+.rdp-day:hover { background: rgba(255,255,255,.1); }
+.rdp-day_selected:not([disabled]) {
+  background: var(--rdp-accent-color);
+  color: #fff;
+}
+.rdp-range_start, .rdp-range_end { border-radius: 10px; }
+.rdp-day_disabled {
+  opacity: .45;
+  text-decoration: line-through;
+  pointer-events: none;
+}
+
+/* На очень узких экранах (мобилки) позволяем складываться в столбик */
+@media (max-width: 640px) {
+  .rdp-months { flex-wrap: wrap; }
+  .rdp-month  { min-width: 100%; }
+}
+
+/* ==== Calendar helpers (safe add) ==== */
+.tabularNums {
+  font-variant-numeric: tabular-nums; /* ровные цифры */
+}
+
+/* компактный бейдж цены в правом верхнем углу клетки */
+.calendarPrice {
+  position: absolute;
+  top: 0.25rem;         /* top-1 */
+  right: 0.25rem;       /* right-1 */
+  padding: 0.125rem 0.375rem; /* py-0.5 px-1.5 */
+  border-radius: 0.375rem;    /* rounded-md */
+  font-size: 11px;            /* text-[11px] */
+  font-weight: 500;
+  color: #fff;
+  background: rgba(0, 0, 0, .55); /* bg-black/55 */
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);      /* «скляний» эффект */
+  font-variant-numeric: tabular-nums;
+}
+
+/* заметная заливка для зайнятих дат (штриховка) */
+.calendarBusy {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(244, 63, 94, .70) 0 6px,   /* ~rose-500 */
+    rgba(244, 63, 94, .85) 6px 12px
+  );
 }
