@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useAuthModal } from "./AuthModalProvider";
 import { useSearchParams } from "next/navigation";
@@ -9,7 +9,7 @@ function cx(...c: Array<string | false | null | undefined>) {
   return c.filter(Boolean).join(" ");
 }
 
-export default function AuthModal() {
+function AuthModalContent() {
   const { isOpen, mode, setMode, close, returnTo } = useAuthModal();
   const sp = useSearchParams();
   const fallbackReturn = sp.get("return") || "/cabinet";
@@ -67,6 +67,14 @@ export default function AuthModal() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthModal() {
+  return (
+    <Suspense fallback={null}>
+      <AuthModalContent />
+    </Suspense>
   );
 }
 
@@ -275,7 +283,7 @@ function RegisterForm({
         <div className="flex items-start gap-2">
           <span className="flex-shrink-0 size-5 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-300 text-base">💡</span>
           <p className="text-white/90 leading-relaxed">
-            <strong>Вже робили бронь до реєстрації?</strong> Обов'язково вкажіть той самий контакт (email, телефон або Telegram), який використовували при бронюванні — тоді ваше бронювання автоматично підв'яжеться до вашого кабінету.
+            <strong>Вже робили бронь до реєстрації?</strong> Обов&apos;язково вкажіть той самий контакт (email, телефон або Telegram), який використовували при бронюванні — тоді ваше бронювання автоматично підв&apos;яжеться до вашого кабінету.
           </p>
         </div>
       </div>
