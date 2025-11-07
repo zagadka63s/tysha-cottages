@@ -1,6 +1,9 @@
 ﻿// src/app/book/page.tsx
 import { site } from "@/data/site";
 import BookingForm from "@/components/BookingForm";
+import { Suspense } from "react";
+
+export const dynamic = 'force-dynamic';
 
 export default function BookPage() {
   const cleanPhone = site.contacts.phone.replace(/\s/g, "");
@@ -57,7 +60,9 @@ export default function BookPage() {
 
           {/* Форма бронирования на всю доступную ширину */}
           <div className="w-full">
-            <BookingForm />
+            <Suspense fallback={<div className="glass p-6 text-center">Завантаження форми…</div>}>
+              <BookingForm />
+            </Suspense>
           </div>
 
           {/* Коротка примітка */}
