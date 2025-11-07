@@ -1,10 +1,8 @@
 // next.config.ts
-import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  // твои будущие настройки можно сюда добавлять
+const nextConfig = {
   eslint: {
-    // говорим Vercel: не валить билд из-за eslint-ошибок
+    // не валить билд, если eslint нашёл ошибки
     ignoreDuringBuilds: true,
   },
 };
