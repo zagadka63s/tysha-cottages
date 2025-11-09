@@ -96,7 +96,7 @@ export default function Home() {
               <select
                 name="guests"
                 aria-label="Кількість гостей"
-                defaultValue="1"
+                defaultValue="2"
                 className="
                   w-full rounded-full bg-white/70 backdrop-blur
                   px-4 py-3 pl-11 pr-10 outline-none appearance-none
@@ -105,8 +105,6 @@ export default function Home() {
               >
                 <option value="1">1 гість</option>
                 <option value="2">2 гості</option>
-                <option value="3">3 гості</option>
-                <option value="4">4 гості</option>
               </select>
               <UserIcon />
               <ChevronIcon />
