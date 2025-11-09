@@ -95,6 +95,11 @@ bot.command("start", async (ctx) => {
           one_time_keyboard: true,
         },
       });
+
+      await ctx.reply(
+        "Або надішліть свій email у форматі:\nприклад@email.com",
+        { reply_markup: { remove_keyboard: true } }
+      );
     }
   }
 });
@@ -511,6 +516,81 @@ bot.command("contact", async (ctx) => {
       "💬 Telegram: @a_servelle",
     { parse_mode: "HTML" }
   );
+});
+
+// ==================== ОБРАБОТКА EMAIL ДЛЯ АВТОРИЗАЦИИ ====================
+
+// Обработка текстовых сообщений (email для авторизации)
+bot.on("message:text", async (ctx) => {
+  const chatId = ctx.chat.id.toString();
+  const text = ctx.message.text.trim();
+
+  // Игнорируем команды
+  if (text.startsWith("/")) return;
+
+  // Игнорируем сообщения от админа
+  if (chatId === ADMIN_ID) return;
+
+  // Проверяем, авторизован ли пользователь
+  const user = await prisma.user.findUnique({
+    where: { telegramChatId: chatId },
+  });
+
+  // Если уже авторизован - игнорируем (это может быть подпись к фото)
+  if (user) return;
+
+  // Проверяем, это email?
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(text)) {
+    await ctx.reply(
+      "❌ Невірний формат email. Спробуйте ще раз або натисніть кнопку '📱 Поділитися номером'."
+    );
+    return;
+  }
+
+  const emailNormalized = text.toLowerCase();
+
+  try {
+    // Ищем пользователя по email
+    const existingUser = await prisma.user.findUnique({
+      where: { email: emailNormalized },
+    });
+
+    if (existingUser) {
+      // Обновляем telegramChatId
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: { telegramChatId: chatId },
+      });
+
+      // Считаем брони
+      const bookingsCount = await prisma.booking.count({
+        where: { userId: existingUser.id },
+      });
+
+      await ctx.reply(
+        `✅ Авторизація успішна!\n\n` +
+          `Ви увійшли як: ${existingUser.name || "гість"}\n` +
+          `Email: ${existingUser.email}\n` +
+          `Знайдено бронювань: ${bookingsCount}\n\n` +
+          `Команди:\n` +
+          `/my_bookings - мої брони\n` +
+          `/contact - написати адміністратору`,
+        {
+          reply_markup: { remove_keyboard: true },
+        }
+      );
+    } else {
+      // Email не найден
+      await ctx.reply(
+        `❌ Користувача з email ${emailNormalized} не знайдено.\n\n` +
+          `Спочатку зареєструйтеся на сайті або натисніть кнопку '📱 Поділитися номером' для автоматичної реєстрації.`
+      );
+    }
+  } catch (error) {
+    console.error("Error during email auth:", error);
+    await ctx.reply("❌ Помилка авторизації. Спробуйте пізніше.");
+  }
 });
 
 // ==================== ОБРАБОТКА ФОТО ЧЕКОВ ====================
