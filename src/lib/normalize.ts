@@ -1,11 +1,24 @@
 // src/lib/normalize.ts
 
-/** Нормализация телефона: оставляем только цифры.
- * Возвращаем строку из цифр (минимум 10) или null, если не похоже на телефон.
+/** Нормализация телефона: +380XXXXXXXXX формат.
+ * Возвращаем +380код (минимум 10 цифр) или null, если не похоже на телефон.
  */
 export function normalizePhone(raw?: string | null): string | null {
     const digits = (raw ?? "").replace(/\D/g, "");
-    return digits.length >= 10 ? digits : null;
+    if (digits.length < 10) return null;
+
+    // Если уже начинается с 380 (международный формат)
+    if (digits.startsWith("380")) {
+      return `+${digits}`;
+    }
+
+    // Если локальный формат (0XXXXXXXXX) - добавляем +380
+    if (digits.startsWith("0") && digits.length === 10) {
+      return `+380${digits.slice(1)}`;
+    }
+
+    // Любой другой случай с 10+ цифрами - добавляем +380
+    return `+380${digits}`;
   }
   
   /** Нормализация Telegram-хэндла:
