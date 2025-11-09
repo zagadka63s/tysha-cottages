@@ -19,7 +19,7 @@ export async function sendTelegramMessage(
   text: string,
   options?: {
     parse_mode?: "HTML" | "Markdown" | "MarkdownV2";
-    reply_markup?: any;
+    reply_markup?: { inline_keyboard?: Array<Array<{ text: string; callback_data: string }>> };
   }
 ) {
   if (!bot) {
@@ -48,7 +48,7 @@ export async function sendTelegramPhoto(
   caption?: string,
   options?: {
     parse_mode?: "HTML" | "Markdown" | "MarkdownV2";
-    reply_markup?: any;
+    reply_markup?: { inline_keyboard?: Array<Array<{ text: string; callback_data: string }>> };
   }
 ) {
   if (!bot) {

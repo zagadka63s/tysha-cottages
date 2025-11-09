@@ -59,15 +59,15 @@ async function loadSurcharges(): Promise<SurchargesConf> {
       conf.extraGuest = {
         amount: s.amount,
         unit: s.unit as "PER_NIGHT" | "PER_STAY",
-        includedGuests: (s.params as any)?.includedGuests ?? 2,
+        includedGuests: (s.params as Record<string, unknown>)?.includedGuests as number ?? 2,
       };
     } else if (s.type === "PET") {
-      conf.pet = { amount: s.amount, unit: s.unit as any };
+      conf.pet = { amount: s.amount, unit: s.unit as "PER_NIGHT" | "PER_STAY" };
     } else if (s.type === "CHILD_OVER_AGE") {
       conf.childOverAge = {
         amount: s.amount,
-        unit: s.unit as any,
-        ageThreshold: (s.params as any)?.ageThreshold ?? 6,
+        unit: s.unit as "PER_NIGHT" | "PER_STAY",
+        ageThreshold: (s.params as Record<string, unknown>)?.ageThreshold as number ?? 6,
       };
     }
   }

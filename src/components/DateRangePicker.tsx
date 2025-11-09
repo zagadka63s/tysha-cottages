@@ -54,7 +54,7 @@ export default function DateRangePicker({
       : undefined;
 
   const disabled = React.useMemo(() => {
-    const rules: any[] = busyToDisabled(busy);
+    const rules: Array<{ from: Date; to: Date } | { before: Date }> = busyToDisabled(busy);
     if (minFrom) rules.push({ before: ymdToDate(minFrom) });
     return rules;
   }, [busy, minFrom]);

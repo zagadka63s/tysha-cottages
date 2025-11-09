@@ -291,7 +291,7 @@ export default function AdminCalendar({ bookings, monthISO }: Props) {
           <thead className="bg-white/5 text-left">
             <tr>
               <th className="py-1.5 px-2">Період проживання</th>
-              <th className="py-1.5 px-2">Ім'я</th>
+              <th className="py-1.5 px-2">Ім&apos;я</th>
               <th className="py-1.5 px-2">Гості</th>
               <th className="py-1.5 px-2">Сума</th>
               <th className="py-1.5 px-2">Статус</th>

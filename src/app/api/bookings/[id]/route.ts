@@ -32,7 +32,7 @@ export async function PATCH(
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json().catch(() => ({} as any));
+    const body = await req.json().catch(() => ({} as Record<string, unknown>));
     const next = (body?.status ?? "") as BookingStatus;
     if (!["CONFIRMED", "CANCELLED"].includes(next)) {
       return NextResponse.json({ error: "unknown status" }, { status: 400 });
@@ -53,7 +53,7 @@ export async function POST(
 ) {
   try {
     const { id } = await ctx.params;
-    const body = await req.json().catch(() => ({} as any));
+    const body = await req.json().catch(() => ({} as Record<string, unknown>));
     const action = (body?.action ?? "").toString().toLowerCase();
     const key = (body?.adminKey ?? "").toString();
 
@@ -61,10 +61,10 @@ export async function POST(
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 
-    const next: BookingStatus =
+    const next: BookingStatus | null =
       action === "confirm" ? "CONFIRMED" :
       action === "cancel"  ? "CANCELLED" :
-      (null as any);
+      null;
 
     if (!next) {
       return NextResponse.json({ error: "unknown action" }, { status: 400 });

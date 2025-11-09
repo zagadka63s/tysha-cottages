@@ -117,13 +117,27 @@ bot.on("callback_query:data", async (ctx) => {
     return;
   }
 
-  // Только админ может использовать кнопки
-  if (chatId !== ADMIN_ID) {
-    await ctx.answerCallbackQuery("❌ Ця функція доступна тільки адміністратору");
-    return;
-  }
-
   try {
+    // Обработка кнопки "Завантажити квитанцію" от клиента
+    if (data.startsWith("upload_receipt_")) {
+      const bookingId = data.replace("upload_receipt_", "");
+
+      await ctx.answerCallbackQuery();
+      await ctx.reply(
+        `📎 Щоб завантажити квитанцію для брони <code>${bookingId}</code>, просто надішліть фото чека в цей чат.\n\n` +
+        `Якщо у вас кілька броней, додайте номер брони у підпис до фото:\n` +
+        `<code>${bookingId}</code>`,
+        { parse_mode: "HTML" }
+      );
+      return;
+    }
+
+    // Только админ может использовать кнопки подтверждения/отклонения
+    if (chatId !== ADMIN_ID) {
+      await ctx.answerCallbackQuery("❌ Ця функція доступна тільки адміністратору");
+      return;
+    }
+
     // confirm_BOOKING_ID или cancel_BOOKING_ID или payment_BOOKING_ID
     const [action, bookingId] = data.split("_");
 
@@ -383,8 +397,7 @@ bot.command("my_bookings", async (ctx) => {
       return;
     }
 
-    let message = `📋 <b>Ваші бронювання:</b>\n\n`;
-
+    // Отправляем каждое бронирование отдельным сообщением с кнопкой
     for (const booking of user.bookings) {
       const statusEmoji =
         booking.status === "CONFIRMED"
@@ -393,14 +406,33 @@ bot.command("my_bookings", async (ctx) => {
           ? "❌"
           : "⏳";
 
-      message += `${statusEmoji} <b>${booking.id}</b>\n`;
-      message += `📅 ${formatDate(booking.checkIn)} - ${formatDate(booking.checkOut)}\n`;
-      message += `👥 Гостей: ${booking.guests}\n`;
-      message += `💰 Сумма: ₴${booking.quoteTotalUAH?.toLocaleString("uk-UA") || "—"}\n`;
-      message += `Статус: ${getStatusText(booking.status)}\n\n`;
-    }
+      const message =
+        `${statusEmoji} <b>Бронювання</b>\n\n` +
+        `📋 ID: <code>${booking.id}</code>\n` +
+        `📅 ${formatDate(booking.checkIn)} - ${formatDate(booking.checkOut)}\n` +
+        `👥 Гостей: ${booking.guests}\n` +
+        `💰 Сумма: ₴${booking.quoteTotalUAH?.toLocaleString("uk-UA") || "—"}\n` +
+        `Статус: ${getStatusText(booking.status)}`;
 
-    await ctx.reply(message, { parse_mode: "HTML" });
+      // Добавляем кнопку "Завантажити квитанцію" только для PENDING
+      if (booking.status === "PENDING") {
+        await ctx.reply(message, {
+          parse_mode: "HTML",
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "📎 Завантажити квитанцію",
+                  callback_data: `upload_receipt_${booking.id}`,
+                },
+              ],
+            ],
+          },
+        });
+      } else {
+        await ctx.reply(message, { parse_mode: "HTML" });
+      }
+    }
   } catch (error) {
     console.error("Error fetching bookings:", error);
     await ctx.reply("❌ Помилка завантаження бронювань.");

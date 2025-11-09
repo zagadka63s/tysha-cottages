@@ -64,7 +64,7 @@ export async function POST(req: Request) {
           email ? { email } : undefined,
           phone ? { phoneNormalized: phone } : undefined,
           telegram ? { telegramHandleNormalized: telegram } : undefined,
-        ].filter(Boolean) as any,
+        ].filter(Boolean) as Array<{ email?: string } | { phoneNormalized?: string } | { telegramHandleNormalized?: string }>,
       },
       select: { id: true },
     });

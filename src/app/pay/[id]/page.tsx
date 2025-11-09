@@ -35,16 +35,12 @@ function money(n: number | null | undefined) {
   }
 }
 
-/** Next 15: params може бути об'єктом або Promise */
+/** Next 15: params Promise */
 type ParamsResolved = { id: string };
-type ParamsProp = ParamsResolved | Promise<ParamsResolved>;
 
-export default async function PayPage({ params }: { params: ParamsProp }) {
+export default async function PayPage({ params }: { params: Promise<ParamsResolved> }) {
   // ✅ Акуратно «дістаємо» id з params / Promise<params>
-  const { id } =
-    typeof (params as any)?.then === "function"
-      ? await (params as Promise<ParamsResolved>)
-      : (params as ParamsResolved);
+  const { id } = await params;
 
   const booking = await prisma.booking.findUnique({
     where: { id },
@@ -203,7 +199,7 @@ export default async function PayPage({ params }: { params: ParamsProp }) {
               <div className="text-sm text-white/90 space-y-1">
                 <p className="font-medium">Важливо:</p>
                 <p className="opacity-90">
-                  Обов'язково вкажіть <b>номер бронювання</b> у призначенні платежу або надішліть нам квитанцію в месенджері для швидкого підтвердження.
+                  Обов&apos;язково вкажіть <b>номер бронювання</b> у призначенні платежу або надішліть нам квитанцію в месенджері для швидкого підтвердження.
                 </p>
               </div>
             </div>
@@ -279,7 +275,7 @@ export default async function PayPage({ params }: { params: ParamsProp }) {
                 3
               </div>
               <p className="text-sm text-white/85 pt-0.5">
-                Ми перевіримо оплату та змінимо статус на <b className="text-emerald-300">"Підтверджено"</b> у вашому кабінеті
+                Ми перевіримо оплату та змінимо статус на <b className="text-emerald-300">&quot;Підтверджено&quot;</b> у вашому кабінеті
               </p>
             </div>
           </div>

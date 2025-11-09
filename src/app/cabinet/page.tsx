@@ -41,9 +41,8 @@ const statusLabelUA: Record<BookingStatus | "ALL", string> = {
 const isBookingStatus = (v: string): v is BookingStatus =>
   v === "PENDING" || v === "CONFIRMED" || v === "CANCELLED";
 
-/** ── SearchParams: в Next 15 може бути object АБО Promise<object> */
+/** ── SearchParams: в Next 15 Promise<object> */
 type SearchParamsResolved = Record<string, string | string[] | undefined>;
-type SearchParamsProp = SearchParamsResolved | Promise<SearchParamsResolved>;
 
 type StatusTab = "ALL" | BookingStatus;
 
@@ -60,13 +59,10 @@ function PageBackground() {
 export default async function CabinetPage({
   searchParams,
 }: {
-  searchParams: SearchParamsProp;
+  searchParams: Promise<SearchParamsResolved>;
 }) {
   // --- resolve searchParams (Next 15 Promise API) ---
-  const spObj: SearchParamsResolved =
-    typeof (searchParams as any)?.then === "function"
-      ? await (searchParams as Promise<SearchParamsResolved>)
-      : ((searchParams as SearchParamsResolved) ?? {});
+  const spObj = await searchParams;
 
   // 1) серверна сесія
   const session = await getServerSession(authOptions);
@@ -251,7 +247,7 @@ export default async function CabinetPage({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div className="text-sm text-white/85 leading-relaxed">
-                  Тут ви можете переглядати свої бронювання, відслідковувати статус заявок та швидко зв'язатися з нами через месенджер.
+                  Тут ви можете переглядати свої бронювання, відслідковувати статус заявок та швидко зв&apos;язатися з нами через месенджер.
                 </div>
               </div>
             </header>

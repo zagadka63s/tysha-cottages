@@ -62,7 +62,7 @@ export const authOptions: NextAuthOptions = {
               email    ? { email } : undefined,
               phone    ? { phoneNormalized: phone } : undefined,
               telegram ? { telegramHandleNormalized: telegram } : undefined,
-            ].filter(Boolean) as any,
+            ].filter(Boolean) as Array<{ email?: string } | { phoneNormalized?: string } | { telegramHandleNormalized?: string }>,
           },
           select: { id: true, email: true, passwordHash: true, name: true, role: true },
         });
@@ -82,16 +82,16 @@ export const authOptions: NextAuthOptions = {
     // Пишем id и роль в токен при логине
     async jwt({ token, user }) {
       if (user) {
-        token.uid = (user as any).id;
-        token.role = (user as any).role ?? "USER";
+        token.uid = (user as { id?: string }).id;
+        token.role = (user as { role?: string }).role ?? "USER";
       }
       return token;
     },
     // Прокидываем id и роль из токена в session.user
     async session({ session, token }) {
       if (session.user) {
-        if (token?.uid)  (session.user as any).id = token.uid as string;
-        if (token?.role) (session.user as any).role = token.role as string;
+        if (token?.uid)  (session.user as { id?: string }).id = token.uid as string;
+        if (token?.role) (session.user as { role?: string }).role = token.role as string;
       }
       return session;
     },
@@ -100,7 +100,7 @@ export const authOptions: NextAuthOptions = {
   events: {
     async signIn({ user }) {
       try {
-        const userId = (user as any)?.id as string | undefined;
+        const userId = (user as { id?: string })?.id;
         if (userId) {
           await linkBookingsToUserByIdentifiers(userId);
         }

@@ -100,7 +100,7 @@ function DatePopover({
                 setOpen(false);
               }
             }}
-            disabled={disabled as any}
+            disabled={disabled as { before?: Date | undefined }[]}
             className="rdp"
             classNames={{
               caption_label: "rdp-caption_label text-white/90",

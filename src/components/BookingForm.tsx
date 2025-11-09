@@ -70,16 +70,17 @@ type Quote = {
 
 /** нормализуем ответ API к BusyInterval[] (YYYY-MM-DD) */
 function normalizeBusyFromApi(raw: unknown): BusyInterval[] {
-  const list: any[] = Array.isArray(raw)
+  const list: unknown[] = Array.isArray(raw)
     ? raw
-    : raw && typeof raw === "object" && (raw as any).busy
-    ? (raw as any).busy
+    : raw && typeof raw === "object" && (raw as Record<string, unknown>).busy
+    ? (raw as Record<string, unknown>).busy as unknown[]
     : [];
 
   return list
     .map((i) => {
-      const s = i?.start ? new Date(i.start) : null;
-      const e = i?.end ? new Date(i.end) : null;
+      const item = i as Record<string, unknown>;
+      const s = item?.start ? new Date(item.start as string) : null;
+      const e = item?.end ? new Date(item.end as string) : null;
       if (!s || !e || isNaN(+s) || isNaN(+e)) return null;
       s.setHours(0, 0, 0, 0);
       e.setHours(0, 0, 0, 0);
@@ -327,8 +328,8 @@ export default function BookingForm() {
       setEmailInput("");
       setPhoneInput("");
       setTelegramInput("");
-    } catch (err: any) {
-      setNote(err?.message || "Сталася помилка. Спробуйте ще раз.");
+    } catch (err) {
+      setNote((err as Error)?.message || "Сталася помилка. Спробуйте ще раз.");
     } finally {
       setPending(false);
     }
