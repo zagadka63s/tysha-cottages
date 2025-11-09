@@ -154,7 +154,7 @@ export default function Home() {
       <section className="container section">
         <h2 className="mb-8 text-center">Навколо будинку</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {[3, 4, 5, 'IMG_8226'].map((n) => (
+          {[3, 4, 98, 99].map((n) => (
             <div
               key={n}
               className="overflow-hidden rounded-2xl shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
@@ -214,7 +214,7 @@ export default function Home() {
           <div className="group overflow-hidden rounded-2xl shadow-lg transition-transform duration-300 hover:scale-[1.02] hover:shadow-2xl">
             <div className="relative h-64 md:h-72 overflow-hidden">
               <img
-                src="/images/12.jpg"
+                src="/images/132.jpg"
                 alt="Кухня-вітальня"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
@@ -248,7 +248,7 @@ export default function Home() {
           <div className="group overflow-hidden rounded-2xl shadow-lg transition-transform duration-300 hover:scale-[1.02] hover:shadow-2xl">
             <div className="relative h-64 md:h-72 overflow-hidden">
               <img
-                src="/images/13.jpg"
+                src="/images/333.jpg"
                 alt="Ванна кімната"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"

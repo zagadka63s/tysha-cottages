@@ -14,7 +14,7 @@ async function main() {
         weekdayPrice: 6900,
         weekendPrice: 7900,
         currency: "UAH",
-        weekendDays: "FRI,SAT", // Если нужно включить воскресенье: "FRI,SAT,SUN"
+        weekendDays: "FRI,SAT,SUN",
       },
     });
     console.log("✓ Created base Season (2025)");
