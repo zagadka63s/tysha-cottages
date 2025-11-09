@@ -66,7 +66,8 @@ bot.command("start", async (ctx) => {
 
       message += "Доступні команди:\n";
       message += "/my_bookings - мої брони\n";
-      message += "/contact - написати адміністратору";
+      message += "/contact - написати адміністратору\n";
+      message += "/logout - вийти з акаунту";
 
       await ctx.reply(message, { parse_mode: "HTML" });
     } else {
@@ -298,7 +299,8 @@ bot.on("message:contact", async (ctx) => {
           `Знайдено бронювань: ${bookingsCount}\n\n` +
           `Команди:\n` +
           `/my_bookings - мої брони\n` +
-          `/contact - написати адміністратору`,
+          `/contact - написати адміністратору\n` +
+          `/logout - вийти з акаунту`,
         {
           reply_markup: { remove_keyboard: true },
         }
@@ -341,7 +343,8 @@ bot.on("message:contact", async (ctx) => {
 
       message += `Команди:\n` +
         `/my_bookings - мої брони\n` +
-        `/contact - написати адміністратору`;
+        `/contact - написати адміністратору\n` +
+        `/logout - вийти з акаунту`;
 
       await ctx.reply(message, {
         reply_markup: { remove_keyboard: true },
@@ -518,6 +521,32 @@ bot.command("contact", async (ctx) => {
   );
 });
 
+// /logout - Выход из аккаунта
+bot.command("logout", async (ctx) => {
+  const chatId = ctx.chat.id.toString();
+
+  // Проверяем, авторизован ли пользователь
+  const user = await prisma.user.findUnique({
+    where: { telegramChatId: chatId },
+  });
+
+  if (!user) {
+    await ctx.reply("Ви не авторизовані.");
+    return;
+  }
+
+  // Удаляем telegramChatId
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { telegramChatId: null },
+  });
+
+  await ctx.reply(
+    "✅ Ви вийшли з акаунту.\n\n" +
+      "Щоб увійти знову, використайте /start"
+  );
+});
+
 // ==================== ОБРАБОТКА EMAIL ДЛЯ АВТОРИЗАЦИИ ====================
 
 // Обработка текстовых сообщений (email для авторизации)
@@ -575,7 +604,8 @@ bot.on("message:text", async (ctx) => {
           `Знайдено бронювань: ${bookingsCount}\n\n` +
           `Команди:\n` +
           `/my_bookings - мої брони\n` +
-          `/contact - написати адміністратору`,
+          `/contact - написати адміністратору\n` +
+          `/logout - вийти з акаунту`,
         {
           reply_markup: { remove_keyboard: true },
         }
