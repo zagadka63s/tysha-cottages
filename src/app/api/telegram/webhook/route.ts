@@ -32,6 +32,10 @@ function normalizePhone(phone: string): string {
 // /start - Начало работы с ботом
 bot.command("start", async (ctx) => {
   const chatId = ctx.chat.id.toString();
+
+  // Для налагодження - виводимо chatId
+  console.log(`[Telegram] /start від chatId: ${chatId}, ADMIN_ID: ${ADMIN_ID}`);
+
   const isAdmin = chatId === ADMIN_ID;
 
   // Извлекаем параметры из /start (например: /start booking_cmhlz078p0001vbws5xgzx66j)
@@ -119,6 +123,8 @@ bot.command("start", async (ctx) => {
 bot.on("callback_query:data", async (ctx) => {
   const data = ctx.callbackQuery.data;
   const chatId = ctx.chat?.id.toString();
+
+  console.log(`[Telegram] callback від chatId: ${chatId}, ADMIN_ID: ${ADMIN_ID}, data: ${data}`);
 
   if (!chatId) {
     await ctx.answerCallbackQuery("❌ Помилка: не вдалося визначити чат");
