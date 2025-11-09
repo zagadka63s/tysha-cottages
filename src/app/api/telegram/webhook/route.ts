@@ -14,6 +14,14 @@ if (!BOT_TOKEN) {
 // Создаем бота
 const bot = new Bot(BOT_TOKEN);
 
+// Устанавливаем меню команд
+bot.api.setMyCommands([
+  { command: "start", description: "Почати роботу з ботом" },
+  { command: "my_bookings", description: "Мої бронювання" },
+  { command: "contact", description: "Контакти адміністрації" },
+  { command: "logout", description: "Вийти з акаунту" },
+]);
+
 // Нормализация телефона (удаляем все кроме цифр и +)
 function normalizePhone(phone: string): string {
   return phone.replace(/[^\d+]/g, "");
@@ -132,17 +140,19 @@ bot.on("callback_query:data", async (ctx) => {
       return;
     }
 
-    // Только админ может использовать кнопки подтверждения/отклонения
-    if (chatId !== ADMIN_ID) {
-      await ctx.answerCallbackQuery("❌ Ця функція доступна тільки адміністратору");
-      return;
-    }
-
     // confirm_BOOKING_ID или cancel_BOOKING_ID или payment_BOOKING_ID
-    const [action, bookingId] = data.split("_");
+    const parts = data.split("_");
+    const action = parts[0];
+    const bookingId = parts.slice(1).join("_"); // На випадок якщо в ID є _
 
     if (!bookingId || !["confirm", "cancel", "payment"].includes(action)) {
       await ctx.answerCallbackQuery("❌ Невірна команда");
+      return;
+    }
+
+    // Только админ может использовать кнопки подтверждения/отклонения
+    if (chatId !== ADMIN_ID) {
+      await ctx.answerCallbackQuery("❌ Ця функція доступна тільки адміністратору");
       return;
     }
 
