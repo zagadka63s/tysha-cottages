@@ -55,7 +55,7 @@ function normalizeTelegram(raw?: string | null) {
 }
 
 /* ---------- типы ---------- */
-type BusyInterval = { start: string; end: string };
+type BusyInterval = { start: string; end: string; status?: string };
 type Surcharge = { type: string; amountUAH: number; unit: string };
 type PerNight = { date: string; priceUAH: number };
 type Quote = {
@@ -84,7 +84,11 @@ function normalizeBusyFromApi(raw: unknown): BusyInterval[] {
       if (!s || !e || isNaN(+s) || isNaN(+e)) return null;
       s.setHours(0, 0, 0, 0);
       e.setHours(0, 0, 0, 0);
-      return { start: toISO(s), end: toISO(e) } as BusyInterval;
+      return {
+        start: toISO(s),
+        end: toISO(e),
+        status: item?.status as string | undefined
+      } as BusyInterval;
     })
     .filter(Boolean) as BusyInterval[];
 }

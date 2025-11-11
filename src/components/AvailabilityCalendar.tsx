@@ -84,15 +84,15 @@ export default function AvailabilityCalendar({
   const [picking, setPicking] = useState<"from" | "to">("from");
 
   /* нормалізовані зайняті інтервали */
-  const normalizedBusy = useMemo(
-    () =>
-      (busy || []).map((b) => ({
-        start: toISO(fromISO(b.start)),
-        end: toISO(fromISO(b.end)),
-        status: b.status,
-      })),
-    [busy]
-  );
+  const normalizedBusy = useMemo(() => {
+    const result = (busy || []).map((b) => ({
+      start: toISO(fromISO(b.start)),
+      end: toISO(fromISO(b.end)),
+      status: b.status,
+    }));
+    console.log('[Calendar] normalizedBusy:', result);
+    return result;
+  }, [busy]);
 
   /* зовнішні значення */
   const fromISOValue = value?.from || null;
