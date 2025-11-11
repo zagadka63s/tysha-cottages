@@ -21,13 +21,13 @@ export async function GET() {
   try {
     const items = await prisma.booking.findMany({
       where: { status: { in: ["PENDING", "CONFIRMED"] } },
-      select: { checkIn: true, checkOut: true },
+      select: { checkIn: true, checkOut: true, status: true },
     });
 
     const busy = items.map((b) => ({
-      // полуоткрытый диапазон [start, end) !
       start: toISO(startOfDay(b.checkIn)),
       end: toISO(startOfDay(b.checkOut)),
+      status: b.status,
     }));
 
     return NextResponse.json(

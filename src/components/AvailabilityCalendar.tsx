@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 
 /** BusyInterval uses half-open [start, end) in YYYY-MM-DD */
-export type BusyInterval = { start: string; end: string };
+export type BusyInterval = { start: string; end: string; status?: string };
 
 type Range = { from: string | null; to: string | null };
 
@@ -148,16 +148,23 @@ export default function AvailabilityCalendar({
   }
 
   /* helpers */
-  function isBusyDay(d: Date) {
+  function getBookingStatus(d: Date): "CONFIRMED" | "PENDING" | null {
     const dayStartISO = toISO(d);
-    const dayEndISO = toISO(addDays(d, 1)); // [day, day+1)
-    return normalizedBusy.some((b) => intervalsOverlap(dayStartISO, dayEndISO, b.start, b.end));
+    const dayEndISO = toISO(addDays(d, 1));
+    const booking = normalizedBusy.find((b) => intervalsOverlap(dayStartISO, dayEndISO, b.start, b.end));
+    return booking ? (booking.status as "CONFIRMED" | "PENDING") || null : null;
   }
+
+  function isBusyDay(d: Date) {
+    return getBookingStatus(d) !== null;
+  }
+
   function isSelectableDay(d: Date) {
     const iso = toISO(d);
     if (minStartISO && iso < minStartISO) return false;
     if (picking === "to" && minEndISO && iso < minEndISO) return false;
-    return !isBusyDay(d);
+    // Блокируем только CONFIRMED, PENDING можно выбирать
+    return getBookingStatus(d) !== "CONFIRMED";
   }
   function inPickedRange(d: Date) {
     if (!fromISOValue || !toISOValue) return false;
@@ -242,8 +249,9 @@ export default function AvailabilityCalendar({
             <div className="grid grid-cols-7 gap-[6px]">
               {days.map((d, i) => {
                 const inCurr = d.getMonth() === thisMonthNum;
-                const busyDay = isBusyDay(d);
-                const disabled = !isSelectableDay(d); // busy -> disabled
+                const bookingStatus = getBookingStatus(d);
+                const busyDay = bookingStatus !== null;
+                const disabled = !isSelectableDay(d);
                 const picked = inPickedRange(d);
                 const isFrom = fromISOValue && isSameDay(d, fromISO(fromISOValue));
                 const isTo = toISOValue && isSameDay(d, fromISO(toISOValue));
@@ -256,18 +264,31 @@ export default function AvailabilityCalendar({
                   "relative overflow-hidden h-18 md:h-22 rounded-lg border text-[12px] md:text-sm leading-none p-1.5 transition-all duration-200 " +
                   (inCurr ? "bg-white/[0.06] border-white/15 " : "bg-white/[0.03] border-white/10 opacity-75 ");
 
-                // червона рамка + штрихування для зайнятих
-                const busyCls = busyDay ? "border-rose-500 " : "";
-                const busyStyle = busyDay
-                  ? {
-                      backgroundImage:
-                        "repeating-linear-gradient(45deg, rgba(244,63,94,.34) 0, rgba(244,63,94,.34) 6px, rgba(244,63,94,.18) 6px, rgba(244,63,94,.18) 12px)",
-                    }
-                  : undefined;
+                // Разные цвета по статусу
+                let busyCls = "";
+                let busyStyle: React.CSSProperties | undefined = undefined;
+                let dotColor = "";
+
+                if (bookingStatus === "CONFIRMED") {
+                  // Красный для подтвержденных
+                  busyCls = "border-rose-500 ";
+                  busyStyle = {
+                    backgroundImage:
+                      "repeating-linear-gradient(45deg, rgba(244,63,94,.34) 0, rgba(244,63,94,.34) 6px, rgba(244,63,94,.18) 6px, rgba(244,63,94,.18) 12px)",
+                  };
+                  dotColor = "bg-rose-300";
+                } else if (bookingStatus === "PENDING") {
+                  // Желтый/оранжевый для ожидающих
+                  busyCls = "border-amber-500 ";
+                  busyStyle = {
+                    backgroundImage:
+                      "repeating-linear-gradient(45deg, rgba(245,158,11,.34) 0, rgba(245,158,11,.34) 6px, rgba(245,158,11,.18) 6px, rgba(245,158,11,.18) 12px)",
+                  };
+                  dotColor = "bg-amber-300";
+                }
 
                 const pickedCls = picked ? "bg-emerald-500/15 border-emerald-400/40 " : "";
                 const endsCls = (isFrom || isTo) ? "outline outline-2 outline-emerald-300 " : "";
-                // якщо disabled через minStart/minEnd, але не busy — робимо блідим
                 const disabledCls = disabled && !busyDay ? "cursor-not-allowed opacity-50 " : "";
                 const hoverCls = !disabled ? "hover:bg-white/[0.08] hover:scale-105 hover:shadow-lg hover:z-10 " : "";
 
@@ -283,7 +304,7 @@ export default function AvailabilityCalendar({
                   >
                     <div className="flex justify-between items-start">
                       <span>{d.getDate()}</span>
-                      {busyDay && <i className="inline-block size-1.5 rounded-full bg-rose-300" />}
+                      {busyDay && <i className={`inline-block size-1.5 rounded-full ${dotColor}`} />}
                     </div>
 
                     {price !== undefined && (
