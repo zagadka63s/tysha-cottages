@@ -89,6 +89,7 @@ export default function AvailabilityCalendar({
       (busy || []).map((b) => ({
         start: toISO(fromISO(b.start)),
         end: toISO(fromISO(b.end)),
+        status: b.status,
       })),
     [busy]
   );
@@ -191,10 +192,10 @@ export default function AvailabilityCalendar({
     }
     if (fromISO(iso) <= fromISO(fromISOValue)) return;
 
-    // перевірка busy всередині [from, iso] -> напіввідкритий [from, iso+1)
+    // перевірка CONFIRMED всередині [from, iso] -> напіввідкритий [from, iso+1)
     const isoNext = toISO(addDays(fromISO(iso), 1));
-    const hasOverlap = normalizedBusy.some((b) =>
-      intervalsOverlap(fromISOValue, isoNext, b.start, b.end)
+    const hasOverlap = normalizedBusy.some(
+      (b) => b.status === "CONFIRMED" && intervalsOverlap(fromISOValue, isoNext, b.start, b.end)
     );
     if (hasOverlap) return;
 
