@@ -77,8 +77,12 @@ export default function AvailabilityCalendar({
   minStartISO,
   minEndISO,
 }: Props) {
-  /* перший показуваний місяць */
-  const [baseMonth, setBaseMonth] = useState(startOfMonth(new Date()));
+  /* фиксируем на декабре 2025 */
+  const [baseMonth] = useState(() => {
+    const dec2025 = new Date(2025, 11, 1); // 11 = декабрь (месяцы с 0)
+    dec2025.setHours(0, 0, 0, 0);
+    return dec2025;
+  });
 
   /* стадія вибору (від/до) */
   const [picking, setPicking] = useState<"from" | "to">("from");
@@ -210,31 +214,8 @@ export default function AvailabilityCalendar({
 
         return (
           <div key={mIdx} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            {/* заголовок місяця + стрілки на першому місяці */}
-            <div className="mb-2 flex items-center justify-between">
-              <div className="text-base font-semibold">
-                {firstDay.toLocaleDateString("uk-UA", { year: "numeric", month: "long" })}
-              </div>
-              {mIdx === 0 && (
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    className="px-2 py-1 rounded-lg border border-white/20 hover:border-white/40"
-                    onClick={() => setBaseMonth(startOfMonth(addDays(baseMonth, -1)))}
-                    aria-label="Попередній місяць"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    className="px-2 py-1 rounded-lg border border-white/20 hover:border-white/40"
-                    onClick={() => setBaseMonth(startOfMonth(addDays(baseMonth, 31)))}
-                    aria-label="Наступний місяць"
-                  >
-                    ›
-                  </button>
-                </div>
-              )}
+            <div className="mb-2 text-base font-semibold">
+              {firstDay.toLocaleDateString("uk-UA", { year: "numeric", month: "long" })}
             </div>
 
             {/* назви днів */}
